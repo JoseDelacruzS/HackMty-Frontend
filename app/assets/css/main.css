@@ -1,0 +1,66 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --font-sans: 'Figtree', sans-serif;
+
+  /* Registramos tu paleta personalizada en Tailwind */
+  --color-brand-blue-50: #f0f7fc;
+  --color-brand-blue-100: #e0eff8;
+  --color-brand-blue-200: #b9dff1;
+  --color-brand-blue-300: #7cc3e5;
+  --color-brand-blue-400: #37a3d4;
+  --color-brand-blue-500: #1084b9;
+  --color-brand-blue-600: #056999;
+  --color-brand-blue-700: #004977; /* Azul #004977 */
+  --color-brand-blue-800: #073f64;
+  --color-brand-blue-900: #0c3553;
+  --color-brand-blue-950: #082238;
+
+  --color-brand-red-50: #fff1f1;
+  --color-brand-red-100: #ffe1e1;
+  --color-brand-red-200: #ffc7c7;
+  --color-brand-red-300: #ffa0a0;
+  --color-brand-red-400: #f86b6b;
+  --color-brand-red-500: #e83f3f;
+  --color-brand-red-600: #d03027; /* Rojo #D03027 */
+  --color-brand-red-700: #b0231d;
+  --color-brand-red-800: #91211d;
+  --color-brand-red-900: #78221e;
+  --color-brand-red-950: #410d0b;
+}
+
+@layer base {
+  body {
+    line-height: 1.6;
+  }
+}
+
+:root {
+  --ui-radius: 0.75rem;
+}
+
+:root:not(.dark), .light {
+  --ui-bg: var(--ui-color-neutral-50);
+  --ui-bg-muted: var(--ui-color-neutral-100);
+  --ui-text-inverted: var(--ui-color-neutral-50);
+
+  /* Asignamos tus colores exactos SOLO para modo claro */
+  --ui-color-primary-500: var(--color-brand-blue-700);
+  --ui-color-primary-600: var(--color-brand-blue-800);
+  --ui-color-secondary-500: var(--color-brand-red-600);
+}
+
+.dark {
+  --ui-text-highlighted: var(--ui-color-neutral-50);
+  --ui-bg-inverted: var(--ui-color-neutral-50);
+  --ui-border-inverted: var(--ui-color-neutral-50);
+  --ui-bg: var(--ui-color-neutral-900);
+  --ui-bg-muted: var(--ui-color-neutral-800);
+  --ui-text-inverted: var(--ui-color-neutral-900);
+
+  /* Resetear a las variables por defecto de Nuxt UI para el modo oscuro */
+  --ui-color-primary-500: var(--color-blue-500);
+  --ui-color-primary-600: var(--color-blue-600);
+  --ui-color-secondary-500: var(--color-red-400);
+}
