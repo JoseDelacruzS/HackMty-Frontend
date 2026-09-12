@@ -101,6 +101,8 @@ const solvencyPct = computed(() => Math.min(100, Math.round((savingsRate.value /
       </div>
     </UCard>
 
+    <AgentProjectionGraphCard />
+    
     <!-- Solvencia financiera -->
     <UCard :ui="{ body: 'p-6 flex flex-col items-center gap-1 text-center' }">
       <UIcon name="i-heroicons-shield-check" class="size-8 text-primary" />
@@ -112,5 +114,6 @@ const solvencyPct = computed(() => Math.min(100, Math.round((savingsRate.value /
       </p>
       <p class="mt-1 text-[11px] text-dimmed">{{ t('analytics.solvencyHint') }}</p>
     </UCard>
+    
   </div>
 </template>
