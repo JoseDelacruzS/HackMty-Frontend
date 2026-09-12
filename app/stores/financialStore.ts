@@ -96,5 +96,12 @@ export const useFinancialStore = defineStore("financial", {
         );
       }
     },
+    setUser(userData: { name: string; age?: number; retirementAge?: number; customerId?: string }) {
+      this.user = { ...this.user, ...userData };
+    },
+    logout() {
+      this.user = { name: "Sofía", age: 26, retirementAge: 65 };
+      this.executed = false;
+    },
   },
 });
