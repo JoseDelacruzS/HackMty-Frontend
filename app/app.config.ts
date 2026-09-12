@@ -200,6 +200,13 @@ export default defineAppConfig({
           with: "Con agente",
           gain: "+{amount} MXN de ganancia proyectada con micro-aportaciones.",
         },
+        projectionGraph: {
+          title: "Proyección comparativa AFORE",
+          subtitle: "Crecimiento del fondo con agente vs. sin agente",
+          withoutAgent: "Sin agente",
+          withAgent: "Con agente AI",
+          gainSummary: "A los {age} años acumulas +{amount} MXN extra gracias al rebalanceo automático de micro-aportaciones.",
+        },
         metrics: {
           score: "Score de crédito",
           points: "pts",
@@ -366,6 +373,13 @@ export default defineAppConfig({
           without: "Without agent",
           with: "With agent",
           gain: "+{amount} MXN of projected gains with micro-contributions.",
+        },
+        projectionGraph: {
+          title: "AFORE Comparative Projection",
+          subtitle: "Fund growth with agent vs. without agent",
+          withoutAgent: "Without agent",
+          withAgent: "With AI agent",
+          gainSummary: "By age {age} you accumulate +{amount} MXN extra thanks to automated micro-contribution rebalancing.",
         },
         metrics: {
           score: "Credit Score",
