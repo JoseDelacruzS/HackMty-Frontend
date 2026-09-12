@@ -16,7 +16,7 @@ Agente financiero autónomo para **HackMTY 2026 (Capital One Track 1: B2C Financ
 | Estilos | Tailwind v4 + tokens semánticos de Nuxt UI | Solo `bg-default`/`text-muted`/`text-highlighted`/`border-default` |
 | Iconos | Heroicons via `UIcon` (`i-heroicons-*`) | Auto-import desde `@nuxt/icon` (incluido en `@nuxt/ui`) |
 | Estado | Pinia (`@pinia/nuxt`) | Una sola store: `useFinancialStore` |
-| PWA | `@vite-pwa/nuxt` | Desactivado por scope; instalado pero sin service worker activo |
+| PWA | `@vite-pwa/nuxt` | Manifiesto `AutoAfore` (standalone, `es`), iconos 192/512 + maskable en `public/icons/`, SW con `autoUpdate` y fallback de navegación a `/` |
 
 ---
 
@@ -198,6 +198,6 @@ app/
 
 - Onboarding / app tour: explicar en el primer uso Safe-to-Save™, fugas, aportación AFORE y solvencia (pendiente de diseño e implementación).
 - Conexión real a Nessie API (hoy es `setInterval` mockeado).
-- Persistencia offline (PWA desactivado por scope del hackathon).
+- Persistencia offline de datos (el SW ya hace precache del app-shell; falta guardar txns/estado).
 - Notificaciones push al detectar fuga.
 - Multi-cuenta / onboarding de AFORE real.

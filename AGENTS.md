@@ -105,7 +105,7 @@ Documento operativo para agentes AI/IDE que trabajen en este repo. La spec origi
 - **UI**: Nuxt UI v4 + Tailwind v4.
 - **Iconos**: `i-heroicons-*` via `@nuxt/icon` (incluido en `@nuxt/ui`).
 - **Estado**: Pinia (`@pinia/nuxt`).
-- **PWA**: `@vite-pwa/nuxt` instalado pero sin service worker activo (fuera de scope).
+- **PWA**: `@vite-pwa/nuxt` activo (`registerType: autoUpdate`, manifiesto `AutoAfore`, iconos en `public/icons/`). Al añadir rutas/páginas, el precache de Workbox las incluye solo (ver `globPatterns` en `nuxt.config.ts`).
 
 ---
 
@@ -186,7 +186,7 @@ pnpm preview
 
 - Onboarding / app tour: explicar en el primer uso Safe-to-Save™, fugas, aportación AFORE y solvencia (pendiente de diseño e implementación).
 - Conexión real a Nessie API (hoy es `setInterval` mockeado).
-- Persistencia offline (PWA desactivado por scope del hackathon).
+- Persistencia offline de datos (el SW ya hace precache del app-shell; falta guardar txns/estado).
 - Notificaciones push al detectar fuga.
 - Multi-cuenta / onboarding de AFORE real.
 
