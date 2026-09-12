@@ -5,6 +5,15 @@ export default defineNuxtConfig({
 
   css: ['@/assets/css/main.css'],
 
+  runtimeConfig: {
+    bankApiKey: process.env.BANK_API_KEY || 'nessie_secret_api_key_demo_2026',
+    bankApiBaseUrl: process.env.BANK_API_BASE_URL || 'https://api.nessieisreal.com/enterprise',
+    public: {
+      // Public runtime config if any
+      apiUrl: ''
+    }
+  },
+
   app: {
     head: {
       viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
