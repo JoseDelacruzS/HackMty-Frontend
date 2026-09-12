@@ -6,7 +6,8 @@ const { t } = useLocale()
 const navItems = computed(() => [
   { label: t('nav.dashboard'), icon: 'i-heroicons-home', to: '/' },
   { label: t('nav.history'), icon: 'i-heroicons-arrows-right-left', to: '/history' },
-  { label: t('nav.analytics'), icon: 'i-heroicons-chart-pie', to: '/analytics' }
+  { label: t('nav.analytics'), icon: 'i-heroicons-chart-pie', to: '/analytics' },
+  { label: t('nav.savings'), icon: 'i-heroicons-wallet', to: '/saving' }
 ])
 
 function isActive(to: string) {
@@ -30,7 +31,7 @@ function isActive(to: string) {
 
       <!-- Bottom nav fijo -->
       <nav class="shrink-0 z-30 border-t border-default bg-default pb-[env(safe-area-inset-bottom)]">
-        <div class="grid grid-cols-3 gap-1 px-2 py-2">
+        <div class="grid grid-cols-4 gap-1 px-2 py-2">
           <NuxtLink v-for="item in navItems" :key="item.to" :to="item.to"
             class="flex flex-col items-center justify-center gap-1 rounded-[calc(var(--ui-radius)/1.5)] py-2 min-h-14 text-xs font-medium transition-colors"
             :class="isActive(item.to) ? 'text-primary bg-primary/10' : 'text-muted hover:text-highlighted'">
