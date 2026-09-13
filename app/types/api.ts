@@ -162,6 +162,132 @@ export interface AforeContributeResponse {
   logs?: string[]
 }
 
+// ── Analyze / Recommendations (Dashboard + ConsoleLogs) ──
+// /analyze?startDate&endDate llena el dashboard; /analyze/recommendation llena la consola
+export interface AnalyzeQuery {
+  startDate: string // YYYY-MM-DD
+  endDate: string   // YYYY-MM-DD
+}
+
+export interface AnalyzeResponse {
+  message?: string
+  success?: boolean
+  analyzed?: number
+  total?: number
+  // Forma dashboard-like (preferida)
+  user?: UserDTO
+  metrics?: MetricsDTO
+  aforeProjection?: AforeProjectionDTO
+  agent?: AgentDTO
+  summary?: {
+    income?: number
+    fixedExpenses?: number
+    variableExpenses?: number
+    totalExpenses?: number
+    net?: number
+  }
+  // Forma flat (fallback directo)
+  income?: number
+  fixedExpenses?: number
+  safeToSave?: number
+  recommendedAfore?: number
+  creditScore?: number
+  withoutAgent?: number
+  withAgent?: number
+  leakAmount?: number
+  leaksAmount?: number
+  leaksDetected?: number
+  logs?: string[]
+  transactions?: TransactionDTO[]
+  [key: string]: any
+}
+
+export interface RecommendationItem {
+  id?: string
+  title?: string
+  description?: string
+  message?: string
+  amount?: number
+  category?: string
+  type?: string
+  priority?: string
+  [key: string]: any
+}
+
+// Respuesta real de /analyze/recommendation (ejemplo del usuario)
+export interface RecommendationAllocation {
+  to_vault_mxn: number
+  flush_pending_mxn: number
+  flush_at: string
+  reason_key: string
+  leak_recoverable_mxn: number
+  recoverable_by_category: Record<string, number>
+  capacity_mxn: number
+}
+
+export interface RecommendationRationale {
+  narrative_es: string
+  narrative_en: string
+  tokens: {
+    leak_total: number
+    contribution: number
+    impact_65: number
+    flush_pending: number
+  }
+}
+
+export interface RecommendationDiscretionary {
+  txn_id: string
+  verdict: string
+  reason: string
+  amount_mxn: number
+  category: string
+}
+
+export interface RecommendationProjection {
+  without_agent_mxn: number
+  with_agent_mxn: number
+  monthly_contribution_mxn: number
+  assumptions: {
+    annual_return: number
+    scenario: string
+    current_age: number
+    retirement_age: number
+  }
+  disclaimer: string
+}
+
+export interface RecommendationAgentLog {
+  step: string
+  detail: string
+  used_llm: boolean
+  ms: number | null
+}
+
+export interface AnalyzeRecommendationResource {
+  recommendation: {
+    action: string
+    allocation: RecommendationAllocation
+    cadence: string
+    confidence: number
+  }
+  rationale: RecommendationRationale
+  discretionary: RecommendationDiscretionary[]
+  projection: RecommendationProjection
+  agent_log: RecommendationAgentLog[]
+}
+
+export interface AnalyzeRecommendationResponse {
+  message?: string
+  status?: number
+  resource?: AnalyzeRecommendationResource
+  // fallbacks legacy
+  recommendations?: Array<string | RecommendationItem>
+  data?: Array<string | RecommendationItem>
+  result?: Array<string | RecommendationItem>
+  [key: string]: any
+}
+
 // ── Generic ──
 export interface Paginated<T> {
   data: T[]

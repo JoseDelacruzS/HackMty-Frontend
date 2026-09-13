@@ -22,7 +22,8 @@ async function onContribute() {
     </template>
 
     <p class="text-sm text-toned">
-      {{ t('action.detected') }} <strong class="text-highlighted">$840 MXN</strong>
+      {{ t('action.detected') }} <strong class="text-highlighted">${{ ((store as any).analyze?.leakAmount || 840).toLocaleString() }} MXN</strong>
+      <template v-if="(store as any).analyze?.leaksDetected"> · {{ (store as any).analyze.leaksDetected }} fugas</template>
       {{ t('action.leaksKind') }}
       {{ t('action.reassign') }} <strong class="text-highlighted">${{ store.metrics.recommendedAfore }} MXN</strong>
       {{ t('action.noLifestyleChange') }}

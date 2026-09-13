@@ -60,7 +60,7 @@ function formatCurrency(n: number) {
       </div>
       <UBadge color="primary" variant="subtle" class="gap-1 font-semibold">
         <UIcon name="i-heroicons-bolt" class="size-3.5" />
-        14.5% Tasa Fija
+        7.5% Tasa Fija
       </UBadge>
     </div>
 
@@ -125,7 +125,7 @@ function formatCurrency(n: number) {
             <UButton icon="i-heroicons-x-mark" color="neutral" variant="ghost" size="sm" @click="depositModalOpen = false" />
           </div>
           <p class="text-xs text-muted">
-            Transfiere fondos desde tu Safe-to-Save disponible para ganar 14.5% de rendimiento anual.
+            Transfiere fondos desde tu Safe-to-Save disponible para ganar 7.5% de rendimiento anual.
           </p>
           <div class="space-y-2">
             <label class="text-xs font-medium text-toned">{{ t('savings.amountLabel') }}</label>
