@@ -81,65 +81,29 @@ export const useFinancialStore = defineStore("financial", {
       },
     ] as Transaction[],
     executed: false,
-    cajitas: [
-      {
-        id: "c1",
-        title: "Fondo de Emergencia",
-        icon: "i-heroicons-shield-check",
-        balance: 12500,
-        goal: 20000,
-        yieldRate: 0.145,
-        earnedYield: 412.50,
-      },
-      {
-        id: "c2",
-        title: "Vacaciones Verano",
-        icon: "i-heroicons-sun",
-        balance: 4800,
-        goal: 10000,
-        yieldRate: 0.145,
-        earnedYield: 156.20,
-      },
-      {
-        id: "c3",
-        title: "Meta AFORE Voluntaria",
-        icon: "i-heroicons-sparkles",
-        balance: 2500,
-        goal: 5000,
-        yieldRate: 0.145,
-        earnedYield: 92.10,
-      },
-    ] as Cajita[],
+    cajita: {
+      id: "c1",
+      title: "Cajita Afore",
+      icon: "i-heroicons-sparkles",
+      balance: 12500,
+      goal: 20000,
+      yieldRate: 0.145,
+      earnedYield: 412.50,
+    } as Cajita,
   }),
   actions: {
-    depositToCajita(id: string, amount: number) {
-      const cajita = this.cajitas.find(c => c.id === id);
-      if (cajita && amount > 0) {
-        cajita.balance += amount;
-        cajita.earnedYield += Number((amount * 0.002).toFixed(2));
-        this.agentLogs.push(`SAVINGS: Deposited $${amount} MXN into "${cajita.title}".`);
+    depositToCajita(amount: number) {
+      if (this.cajita && amount > 0) {
+        this.cajita.balance += amount;
+        this.cajita.earnedYield += Number((amount * 0.002).toFixed(2));
+        this.agentLogs.push(`SAVINGS: Deposited $${amount} MXN into "${this.cajita.title}".`);
       }
     },
-    withdrawFromCajita(id: string, amount: number) {
-      const cajita = this.cajitas.find(c => c.id === id);
-      if (cajita && amount > 0 && cajita.balance >= amount) {
-        cajita.balance -= amount;
-        this.agentLogs.push(`SAVINGS: Withdrew $${amount} MXN from "${cajita.title}".`);
+    withdrawFromCajita(amount: number) {
+      if (this.cajita && amount > 0 && this.cajita.balance >= amount) {
+        this.cajita.balance -= amount;
+        this.agentLogs.push(`SAVINGS: Withdrew $${amount} MXN from "${this.cajita.title}".`);
       }
-    },
-    createCajita(data: { title: string; icon: string; goal: number; initialDeposit: number }) {
-      const init = data.initialDeposit || 0;
-      const newCajita: Cajita = {
-        id: 'c_' + Date.now(),
-        title: data.title || 'Nueva Cajita',
-        icon: data.icon || 'i-heroicons-wallet',
-        balance: init,
-        goal: data.goal || 5000,
-        yieldRate: 0.145,
-        earnedYield: Number((init * 0.002).toFixed(2)),
-      };
-      this.cajitas.push(newCajita);
-      this.agentLogs.push(`SAVINGS: Created new vault "${newCajita.title}" with $${newCajita.balance} MXN.`);
     },
     applyAforeContribution(amount: number) {
       if (this.executed) return;
