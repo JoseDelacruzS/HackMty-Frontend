@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { useLocale } from '@nuxt/ui/composables'
+import { useAuthStore } from "~/stores/auth"
 import { useFinancialStore } from "~/stores/financialStore"
 
 definePageMeta({ layout: "auth" });
 
 const { t } = useLocale()
 const { code, setLocale } = useAppLocale()
-const store = useFinancialStore()
+const config = useRuntimeConfig()
+const auth = useAuthStore()
+const financial = useFinancialStore()
 
 const localeOptions = [
   { value: 'es' as const, label: 'ES' },
@@ -14,7 +17,7 @@ const localeOptions = [
 ]
 
 const state = reactive({
-  email: '',
+  username: '',
   password: ''
 })
 
@@ -22,28 +25,38 @@ const isLoading = ref(false)
 const showPassword = ref(false)
 const error = ref('')
 
+// si ya esta autenticado el middleware redirige, pero por si acaso hidratamos token
+onMounted(() => {
+  auth.init()
+  if (auth.isAuthenticated) navigateTo('/')
+})
+
 async function onSubmit() {
   error.value = ''
 
-  if (!state.email || state.password.length < 6) {
+  if (!state.username || state.password.length < 6) {
     error.value = t('auth.error')
     return
   }
 
   try {
     isLoading.value = true
-    const res = await $fetch<{ success: boolean; user: any }>('/api/auth/login', {
-      method: 'POST',
-      body: { email: state.email, password: state.password }
-    })
+    await auth.login(state.username.trim(), state.password)
 
-    if (res.success && res.user) {
-      store.setUser(res.user)
-    }
+    // opcional: setear nombre en store financiera para saludo
+    financial.setUser({ name: state.username })
 
     await navigateTo('/')
-  } catch (e) {
-    error.value = t('auth.genericError')
+  } catch (e: any) {
+    const status = e?.statusCode || e?.response?.status
+    const dataMsg = e?.data?.message || e?.statusMessage || e?.message
+    if (status === 401) {
+      error.value = 'Usuario o contraseña incorrectos.'
+    } else if (dataMsg) {
+      error.value = dataMsg
+    } else {
+      error.value = t('auth.genericError')
+    }
   } finally {
     isLoading.value = false
   }
@@ -74,11 +87,11 @@ async function onSubmit() {
         class="text-xs" />
     </Transition>
 
-    <!-- Formulario Personalizado con Nuxt UI v3 -->
+    <!-- Formulario con Nuxt UI -->
     <form @submit.prevent="onSubmit" class="space-y-4">
-      <UFormField :label="t('auth.email')" name="email" required>
-        <UInput v-model="state.email" type="email" icon="i-heroicons-envelope" :placeholder="t('auth.emailPlaceholder')"
-          size="md" class="w-full" autocomplete="email" />
+      <UFormField label="Usuario" name="username" required>
+        <UInput v-model="state.username" type="text" icon="i-heroicons-user" placeholder="938832-8371AASd..."
+          size="md" class="w-full" autocomplete="username" />
       </UFormField>
 
       <UFormField :label="t('auth.password')" name="password" required>
@@ -96,6 +109,11 @@ async function onSubmit() {
         class="mt-2 shadow-md shadow-primary/20">
         {{ t('auth.submit') }}
       </UButton>
+
+      <p class="text-[11px] text-muted text-center leading-relaxed">
+        {{ t('auth.demo') }}<br />
+        <span class="font-mono text-[10px]">POST {{ config.public.apiBaseUrl }}/auth/login</span>
+      </p>
     </form>
   </div>
 </template>

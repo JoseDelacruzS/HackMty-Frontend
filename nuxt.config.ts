@@ -8,11 +8,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     bankApiKey: process.env.BANK_API_KEY || "nessie_secret_api_key_demo_2026",
     bankApiBaseUrl:
-      process.env.BANK_API_BASE_URL ||
-      "https://api.nessieisreal.com/enterprise",
+      (process.env.BANK_API_BASE_URL || "https://api.nessieisreal.com/enterprise").replace(/^"|"$/g, "").replace(/\/$/, ""),
     public: {
-      // Public runtime config if any
-      apiUrl: "",
+      apiBaseUrl:
+        (process.env.BANK_API_BASE_URL || "https://mlh-hackaton-app-backend.onrender.com/api/v1").replace(/^"|"$/g, "").replace(/\/$/, ""),
     },
   },
 

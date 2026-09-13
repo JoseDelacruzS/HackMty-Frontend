@@ -18,10 +18,19 @@
 
 <script setup lang="ts">
 const { locale, code } = useAppLocale()
+const auth = useAuthStore()
 
 useHead({
   htmlAttrs: { lang: code }
 })
+
+// hidrata token desde cookie/localStorage al arrancar
+if (import.meta.client) {
+  auth.init()
+} else {
+  const cookie = useCookie<string | null>('auth_token')
+  if (cookie.value) auth.token = cookie.value
+}
 
 const showSplash = ref(true)
 const isFading = ref(false)
