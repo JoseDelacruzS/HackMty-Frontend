@@ -8,7 +8,15 @@ const { t } = useLocale()
 const firstName = computed(() => store.user.name?.split(' ')[0] ?? 'Sofía')
 
 const { start } = useAgentEngine()
-onMounted(start)
+const isLoadingDashboard = ref(false)
+
+// Hidratación real: GET /api/dashboard
+onMounted(async () => {
+  isLoadingDashboard.value = true
+  await store.fetchDashboard()
+  isLoadingDashboard.value = false
+  start()
+})
 </script>
 <template>
   <div class="p-4 space-y-4">

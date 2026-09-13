@@ -8,6 +8,14 @@ const { t } = useLocale()
 const depositModalOpen = ref(false)
 const withdrawModalOpen = ref(false)
 const operationAmount = ref<number>(500)
+const isLoading = ref(false)
+const isSubmitting = ref(false)
+
+onMounted(async () => {
+  isLoading.value = true
+  await store.fetchCajita()
+  isLoading.value = false
+})
 
 function openDeposit() {
   operationAmount.value = 500
@@ -19,16 +27,20 @@ function openWithdraw() {
   withdrawModalOpen.value = true
 }
 
-function handleDeposit() {
+async function handleDeposit() {
   if (operationAmount.value > 0) {
-    store.depositToCajita(operationAmount.value)
+    isSubmitting.value = true
+    await store.depositToCajitaRemote(operationAmount.value)
+    isSubmitting.value = false
     depositModalOpen.value = false
   }
 }
 
-function handleWithdraw() {
+async function handleWithdraw() {
   if (operationAmount.value > 0 && operationAmount.value <= store.cajita.balance) {
-    store.withdrawFromCajita(operationAmount.value)
+    isSubmitting.value = true
+    await store.withdrawFromCajitaRemote(operationAmount.value)
+    isSubmitting.value = false
     withdrawModalOpen.value = false
   }
 }
@@ -52,8 +64,11 @@ function formatCurrency(n: number) {
       </UBadge>
     </div>
 
+    <div v-if="isLoading" class="py-10 flex justify-center">
+      <UIcon name="i-heroicons-arrow-path" class="size-6 animate-spin text-muted" />
+    </div>
     <!-- Single Main Cajita Card -->
-    <div class="space-y-3">
+    <div v-else class="space-y-3">
       <UCard class="bg-elevated border-default">
         <div class="space-y-4">
           <div class="flex items-start justify-between">
@@ -118,7 +133,7 @@ function formatCurrency(n: number) {
           </div>
           <div class="flex gap-3 pt-2">
             <UButton block color="neutral" variant="subtle" class="flex-1" @click="depositModalOpen = false">Cancelar</UButton>
-            <UButton block color="primary" class="flex-1" @click="handleDeposit">{{ t('savings.submit') }}</UButton>
+            <UButton block color="primary" class="flex-1" :loading="isSubmitting" @click="handleDeposit">{{ t('savings.submit') }}</UButton>
           </div>
         </div>
       </template>
@@ -144,7 +159,7 @@ function formatCurrency(n: number) {
           </div>
           <div class="flex gap-3 pt-2">
             <UButton block color="neutral" variant="subtle" class="flex-1" @click="withdrawModalOpen = false">Cancelar</UButton>
-            <UButton block color="primary" class="flex-1" @click="handleWithdraw">{{ t('savings.submit') }}</UButton>
+            <UButton block color="primary" class="flex-1" :loading="isSubmitting" @click="handleWithdraw">{{ t('savings.submit') }}</UButton>
           </div>
         </div>
       </template>

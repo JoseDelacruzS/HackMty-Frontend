@@ -6,6 +6,13 @@ const { t } = useLocale()
 const { code } = useAppLocale()
 
 const leaks = computed(() => store.transactions.filter(txn => txn.isLeak).length)
+const isLoading = ref(false)
+
+onMounted(async () => {
+  isLoading.value = true
+  await store.fetchTransactions()
+  isLoading.value = false
+})
 
 const open = ref(false)
 const selected = ref<Transaction | null>(null)
@@ -71,7 +78,10 @@ const detail = computed(() => {
       <UBadge v-if="leaks" color="error" size="md">{{ t('history.leaks', { n: leaks }) }}</UBadge>
     </div>
 
-    <div class="space-y-2">
+    <div v-if="isLoading" class="py-6 flex justify-center">
+      <UIcon name="i-heroicons-arrow-path" class="size-6 animate-spin text-muted" />
+    </div>
+    <div v-else class="space-y-2">
       <UCard v-for="txn in store.transactions" :key="txn.id"
         :ui="{ body: 'p-3 flex items-center justify-between gap-3' }"
         class="cursor-pointer transition-colors hover:border-primary/40" @click="openDetail(txn)">
