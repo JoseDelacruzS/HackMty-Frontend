@@ -2,7 +2,6 @@ import type {
   DashboardResponse,
   HistoryResponse,
   HistoryQuery,
-  OperationResponse,
   CreateOperationBody,
   CreateOperationResponse,
   UserResponse,
@@ -159,17 +158,6 @@ export function useFinancialApi() {
     });
   }
 
-  // ── Operation (cajita TRANSFER AHORRO) ──
-  // POST /api/operation { type: "TRANSFER", medium: "balance", status: "completed", amount, description: "AHORRO", merchant }
-  async function createOperation(body: OperationRequest) {
-    return await $fetch<OperationResponse>("/api/operation", {
-      method: "POST",
-      headers: headers(),
-      body,
-      credentials: "include" as any,
-    });
-  }
-
   // ── Helpers para páginas ──
   // GET /api/user → UserResponse { message, status, resource: [...] }
   async function getUser() {
@@ -187,7 +175,6 @@ export function useFinancialApi() {
     depositToCajita,
     withdrawFromCajita,
     contributeAfore,
-    createOperation,
     analyze,
     getAnalyzeRecommendation,
     getUser,
