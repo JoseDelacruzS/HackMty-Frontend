@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useLocale } from '@nuxt/ui/composables'
+import { useFinancialStore } from "~/stores/financialStore"
 
 definePageMeta({ layout: "auth" });
 
 const { t } = useLocale()
 const { code, setLocale } = useAppLocale()
+const store = useFinancialStore()
 
 const localeOptions = [
   { value: 'es' as const, label: 'ES' },
@@ -30,7 +32,15 @@ async function onSubmit() {
 
   try {
     isLoading.value = true
-    // Simular llamada o integrar tu provider de autenticación
+    const res = await $fetch<{ success: boolean; user: any }>('/api/auth/login', {
+      method: 'POST',
+      body: { email: state.email, password: state.password }
+    })
+
+    if (res.success && res.user) {
+      store.setUser(res.user)
+    }
+
     await navigateTo('/')
   } catch (e) {
     error.value = t('auth.genericError')
@@ -44,29 +54,15 @@ async function onSubmit() {
   <div class="space-y-6">
     <!-- Selector de idioma -->
     <div class="flex justify-center">
-      <div class="inline-flex items-center gap-1 rounded-full border border-default bg-muted p-1" role="group" aria-label="Language / Idioma">
-        <button
-          v-for="opt in localeOptions"
-          :key="opt.value"
-          type="button"
+      <div class="inline-flex items-center gap-1 rounded-full border border-default bg-muted p-1" role="group"
+        aria-label="Language / Idioma">
+        <button v-for="opt in localeOptions" :key="opt.value" type="button"
           class="rounded-full px-4 py-1.5 text-xs font-semibold transition-colors"
           :class="code === opt.value ? 'bg-elevated text-highlighted shadow-sm' : 'text-muted hover:text-highlighted'"
-          :aria-pressed="code === opt.value"
-          @click="setLocale(opt.value)"
-        >
+          :aria-pressed="code === opt.value" @click="setLocale(opt.value)">
           {{ opt.label }}
         </button>
       </div>
-    </div>
-
-    <!-- Header interno del form -->
-    <div class="text-center space-y-1.5">
-      <h2 class="text-xl font-bold text-(--ui-text-highlighted)">
-        {{ t('app.title') }}
-      </h2>
-      <p class="text-xs text-(--ui-text-muted)">
-        {{ t('auth.subtitle') }}
-      </p>
     </div>
 
     <!-- Alert de Error -->

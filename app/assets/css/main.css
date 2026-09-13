@@ -40,6 +40,19 @@
   --ui-radius: 0.75rem;
 }
 
+html, body, #__nuxt {
+  height: 100%;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background-color: var(--ui-bg, #082238);
+}
+
 :root:not(.dark), .light {
   --ui-bg: var(--ui-color-neutral-50);
   --ui-bg-muted: var(--ui-color-neutral-100);
