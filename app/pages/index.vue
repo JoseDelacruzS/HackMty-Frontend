@@ -4,16 +4,23 @@ import { useAgentEngine } from "~/composables/useAgentEngine"
 import { useFinancialStore } from "~/stores/financialStore"
 
 const store = useFinancialStore()
+const userStore = useUserStore()
 const { t } = useLocale()
-const firstName = computed(() => store.user.name?.split(' ')[0] ?? 'Sofía')
+const firstName = computed(() => userStore.firstName || store.user.name?.split(' ')[0] || 'Sofía')
 
 const { start } = useAgentEngine()
 const isLoadingDashboard = ref(false)
 
-// Hidratación real: GET /api/dashboard
+// Dashboard se llena desde /analyze (rango mes actual ±1 día)
+// Después /analyze se encadeniza /analyze/recommendation para la consola
 onMounted(async () => {
   isLoadingDashboard.value = true
-  await store.fetchDashboard()
+  // Pipelines: /analyze hidrata métricas/usuario/proyección; recommendations hidrata consola
+  await store.fetchAnalyzeAndRecommendations()
+  // Fallback si backend aún no tiene /analyze: intenta /dashboard
+  if (!(store as any).analyze?.lastAnalyze) {
+    await store.fetchDashboard()
+  }
   isLoadingDashboard.value = false
   start()
 })

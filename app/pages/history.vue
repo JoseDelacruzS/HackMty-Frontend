@@ -10,7 +10,7 @@ const isLoading = ref(false)
 
 onMounted(async () => {
   isLoading.value = true
-  await store.fetchTransactions()
+  await store.fetchOperations()
   isLoading.value = false
 })
 

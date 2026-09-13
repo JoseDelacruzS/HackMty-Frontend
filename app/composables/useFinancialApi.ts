@@ -2,10 +2,18 @@ import type {
   DashboardResponse,
   HistoryResponse,
   HistoryQuery,
+  CreateOperationBody,
+  CreateOperationResponse,
+  UserResponse,
   AnalyticsResponse,
   SavingsResponse,
   SavingsOperationResponse,
   AforeContributeResponse,
+  AnalyzeQuery,
+  AnalyzeResponse,
+  AnalyzeRecommendationResponse,
+  OperationRequest,
+  OperationResponse,
 } from "~/types/api";
 import { useAuthStore } from "~/stores/auth";
 
@@ -18,11 +26,37 @@ import { useAuthStore } from "~/stores/auth";
 export function useFinancialApi() {
   const auth = useAuthStore();
 
+  function resolveToken(): string | null {
+    if (auth.token) return auth.token;
+    if (import.meta.client) {
+      // Fallback directo a cookie/localStorage si Pinia aún no hidrató (evita 401 en /analyze)
+      const cookieToken = useCookie<string | null>("auth_token").value;
+      if (cookieToken) {
+        // sincroniza Pinia para próximas calls
+        auth.token = cookieToken;
+        return cookieToken;
+      }
+      const ls = localStorage.getItem("auth_token");
+      if (ls) {
+        auth.token = ls;
+        return ls;
+      }
+    } else {
+      const cookieToken = useCookie<string | null>("auth_token").value;
+      if (cookieToken) return cookieToken;
+    }
+    return null;
+  }
+
   function headers() {
     const h: Record<string, string> = { accept: "application/json" };
-    if (auth.token) {
-      h["Authorization"] = `Bearer ${auth.token}`;
-      h["authToken"] = auth.token;
+    const token = resolveToken();
+    if (token) {
+      h["Authorization"] = `Bearer ${token}`;
+      h["authToken"] = token;
+      // compat: algunos backends leen `token` o `x-auth-token`
+      h["token"] = token;
+      h["x-auth-token"] = token;
     }
     return h;
   }
@@ -45,6 +79,26 @@ export function useFinancialApi() {
 
   async function getTransactionById(id: string) {
     return await $fetch<HistoryResponse>(`/api/transactions/${id}`, { headers: headers() });
+  }
+
+  // ── Operations (backend real) ──
+  // GET /api/operation?limit&offset&category&isLeak&status → OperationResponse
+  // Backend devuelve { message, status, resource: [...] }
+  async function getOperations(query: HistoryQuery = {}) {
+    return await $fetch<OperationResponse>("/api/operation", {
+      headers: headers(),
+      query,
+    });
+  }
+
+  // ── Operations (backend real) ──
+  // POST /api/operation { type, medium, status, amount, description, merchant }
+  async function createOperation(body: CreateOperationBody) {
+    return await $fetch<CreateOperationResponse>("/api/operation", {
+      method: "POST",
+      headers: headers(),
+      body,
+    });
   }
 
   // ── Analytics ──
@@ -86,20 +140,43 @@ export function useFinancialApi() {
     });
   }
 
+  // ── Analyze / Recommendation ──
+  // GET /api/analyze?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD → llena dashboard (resource.cash_flow, vault, scores)
+  async function analyze(query: AnalyzeQuery) {
+    return await $fetch<AnalyzeResponse>("/api/analyze", {
+      headers: headers(),
+      query,
+      // asegura envío de cookies de sesión en fetch cliente
+      credentials: "include" as any,
+    });
+  }
+  // GET /api/analyze/recommendation (sin params, después de /analyze) → llena ConsoleLogs (modelo)
+  async function getAnalyzeRecommendation() {
+    return await $fetch<AnalyzeRecommendationResponse>("/api/analyze/recommendation", {
+      headers: headers(),
+      credentials: "include" as any,
+    });
+  }
+
   // ── Helpers para páginas ──
+  // GET /api/user → UserResponse { message, status, resource: [...] }
   async function getUser() {
-    return await $fetch<{ user: DashboardResponse["user"] }>("/api/user", { headers: headers() });
+    return await $fetch<UserResponse>("/api/user", { headers: headers() });
   }
 
   return {
     getDashboard,
     getTransactions,
     getTransactionById,
+    getOperations,
+    createOperation,
     getAnalytics,
     getCajita,
     depositToCajita,
     withdrawFromCajita,
     contributeAfore,
+    analyze,
+    getAnalyzeRecommendation,
     getUser,
   };
 }
