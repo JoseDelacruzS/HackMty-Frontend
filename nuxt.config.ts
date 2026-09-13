@@ -19,7 +19,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       viewport:
-        "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content",
+        "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover",
       title: "AlcancIA",
       link: [
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
@@ -33,6 +33,19 @@ export default defineNuxtConfig({
           rel: "apple-touch-icon",
           sizes: "180x180",
           href: "/apple-touch-icon.png",
+        },
+        {
+          rel: "apple-touch-icon-precomposed",
+          sizes: "180x180",
+          href: "/apple-touch-icon.png",
+        },
+        {
+          rel: "apple-touch-startup-image",
+          href: "/icons/icon-512.png",
+        },
+        {
+          rel: "manifest",
+          href: "/manifest.webmanifest",
         },
       ],
       meta: [
@@ -55,6 +68,75 @@ export default defineNuxtConfig({
         { name: "apple-mobile-web-app-title", content: "AlcancIA" },
         { name: "format-detection", content: "telephone=no" },
       ],
+      style: [
+        {
+          children: `
+            html, body { background-color: #082238; }
+            #app-splash {
+              position: fixed;
+              top: 0; left: 0; right: 0; bottom: 0;
+              width: 100vw; height: 100vh;
+              z-index: 999999;
+              background-color: #082238;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 1.5rem;
+              transition: opacity .4s ease, visibility .4s ease;
+            }
+            #app-splash.is-hidden {
+              opacity: 0;
+              visibility: hidden;
+              pointer-events: none;
+            }
+            #app-splash img {
+              width: 96px;
+              height: 96px;
+              border-radius: 24px;
+              box-shadow: 0 12px 40px rgba(0,0,0,.45);
+              animation: splash-breath 1.6s ease-in-out infinite;
+            }
+            #app-splash .splash-dots { display: flex; gap: .45rem; }
+            #app-splash .splash-dots span {
+              width: 7px;
+              height: 7px;
+              border-radius: 9999px;
+              background: rgba(255,255,255,.45);
+              animation: splash-dot 1.2s ease-in-out infinite;
+            }
+            #app-splash .splash-dots span:nth-child(2) { animation-delay: .15s; }
+            #app-splash .splash-dots span:nth-child(3) { animation-delay: .3s; }
+            @keyframes splash-breath { 0%,100% { transform: scale(1); opacity: .95; } 50% { transform: scale(1.06); opacity: 1; } }
+            @keyframes splash-dot { 0%,80%,100% { transform: scale(.6); opacity: .3; } 40% { transform: scale(1); opacity: 1; } }
+          `,
+        },
+      ],
+      script: [
+        {
+          tagPosition: "bodyClose",
+          innerHTML: `
+            (function() {
+              function dismissSplash() {
+                var splash = document.getElementById('app-splash');
+                if (splash && !splash.classList.contains('is-hidden')) {
+                  splash.classList.add('is-hidden');
+                  setTimeout(function() {
+                    if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+                  }, 400);
+                }
+              }
+              if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                setTimeout(dismissSplash, 300);
+              } else {
+                window.addEventListener('DOMContentLoaded', function() { setTimeout(dismissSplash, 300); });
+                window.addEventListener('load', function() { setTimeout(dismissSplash, 300); });
+              }
+              setTimeout(dismissSplash, 1500);
+            })();
+          `,
+        },
+      ],
     },
   },
 
@@ -69,7 +151,6 @@ export default defineNuxtConfig({
       theme_color: "#082238",
       background_color: "#082238",
       display: "standalone",
-      display_override: ["standalone", "minimal-ui"],
       orientation: "portrait",
       scope: "/",
       start_url: "/",
@@ -122,7 +203,7 @@ export default defineNuxtConfig({
       ],
     },
     devOptions: {
-      enabled: false,
+      enabled: true,
       type: "module",
     },
   },
