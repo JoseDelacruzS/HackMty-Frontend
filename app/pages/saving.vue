@@ -63,7 +63,6 @@ function formatCurrency(n: number) {
               </div>
               <div>
                 <h3 class="font-bold text-highlighted text-xl">{{ store.cajita.title }}</h3>
-                <p class="text-muted">
                 <p class="text-muted text-sm">
                   Meta: {{ formatCurrency(store.cajita.goal) }}
                 </p>
