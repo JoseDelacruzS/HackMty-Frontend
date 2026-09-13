@@ -230,6 +230,42 @@ export const useFinancialStore = defineStore("financial", {
       } catch { this.applyAforeContribution(amount); return null; }
     },
 
+    async executeAforeTransferViaOperation(amount?: number) {
+      const amt = Number(amount ?? this.metrics.recommendedAfore);
+      if (!amt || amt <= 0) return null;
+      // Usa token de sesión logueada (mismo que /analyze)
+      const auth = useAuthStore();
+      if (!auth.token) auth.init();
+      try {
+        const { createOperation } = useFinancialApi();
+        const res: any = await createOperation({
+          type: "TRANSFER",
+          medium: "balance",
+          status: "completed",
+          amount: amt,
+          description: "AHORRO",
+          merchant: "AFORE",
+        });
+        // Marca como ejecutado y actualiza saldos optimista
+        this.executed = true;
+        this.metrics.creditScore += 15;
+        // Refleja en cajita si viene balance, o suma optimista
+        const cajitaAmt = Number(res?.resource?.balance_mxn ?? res?.transaction?.amount ?? amt);
+        if (Number.isFinite(cajitaAmt) && cajitaAmt > 0) {
+          this.cajita.balance += amt;
+        } else {
+          // fallback optimista ya hecho arriba
+        }
+        this.agentLogs.push(`OPERATION: TRANSFER $${amt} MXN → AHORRO (AFORE) :: ${res?.message || "Operación registrada"}`);
+        this.agentLogs.push(`CREDIT UPDATE: Cash-flow score increased to ${this.metrics.creditScore} pts.`);
+        return res;
+      } catch (e: any) {
+        const msg = e?.data?.message || e?.statusMessage || e?.message || "Error en operation";
+        this.agentLogs.push(`OPERATION ERROR: ${msg}`);
+        throw e;
+      }
+    },
+
     ensureAnalyze() {
       // Guardia SSR/persistencia: si el estado viene sin `analyze` (hot reload), lo inicializa
       if (!(this as any).analyze) {

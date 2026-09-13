@@ -9,6 +9,8 @@ import type {
   AnalyzeQuery,
   AnalyzeResponse,
   AnalyzeRecommendationResponse,
+  OperationRequest,
+  OperationResponse,
 } from "~/types/api";
 import { useAuthStore } from "~/stores/auth";
 
@@ -133,6 +135,17 @@ export function useFinancialApi() {
     });
   }
 
+  // ── Operation (cajita TRANSFER AHORRO) ──
+  // POST /api/operation { type: "TRANSFER", medium: "balance", status: "completed", amount, description: "AHORRO", merchant }
+  async function createOperation(body: OperationRequest) {
+    return await $fetch<OperationResponse>("/api/operation", {
+      method: "POST",
+      headers: headers(),
+      body,
+      credentials: "include" as any,
+    });
+  }
+
   // ── Helpers para páginas ──
   async function getUser() {
     return await $fetch<{ user: DashboardResponse["user"] }>("/api/user", { headers: headers() });
@@ -147,6 +160,7 @@ export function useFinancialApi() {
     depositToCajita,
     withdrawFromCajita,
     contributeAfore,
+    createOperation,
     analyze,
     getAnalyzeRecommendation,
     getUser,

@@ -288,6 +288,26 @@ export interface AnalyzeRecommendationResponse {
   [key: string]: any
 }
 
+// ── Operation (POST /api/v1/operation) ──
+export type OperationType = "purchase" | "TRANSFER" | "transfer" | string
+export interface OperationRequest {
+  type: OperationType // para cajita: "TRANSFER"
+  medium: Medium // "balance"
+  status: TxnStatus // "completed"
+  amount: number
+  description: string // para cajita: "AHORRO"
+  merchant: string // ej "AFORE" | "UBER EATS"
+  category?: string
+}
+
+export interface OperationResponse {
+  message?: string
+  status?: number
+  resource?: any
+  transaction?: TransactionDTO
+  [key: string]: any
+}
+
 // ── Generic ──
 export interface Paginated<T> {
   data: T[]
