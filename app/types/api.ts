@@ -40,6 +40,25 @@ export interface UserDTO {
   avatar?: string
 }
 
+// ── Backend real: GET /user ──
+// Shape: { message, status, resource: UserResourceDTO[] }
+export interface UserResourceDTO {
+  _id: string
+  username: string
+  firstName: string
+  lastName: string
+  nessieId: string
+  createdAt: string
+  updatedAt: string
+  // password se excluye: no se persiste en cliente
+}
+
+export interface UserResponse {
+  message: string
+  status: number
+  resource: UserResourceDTO[]
+}
+
 export interface MetricsDTO {
   income: number
   fixedExpenses: number
@@ -104,6 +123,45 @@ export interface HistoryQuery {
   category?: string
   isLeak?: boolean
   status?: string
+}
+
+// ── Backend real: GET /operation ──
+// Shape: { message, status, resource: OperationDTO[] }
+export interface OperationDTO {
+  _id: string
+  type: string // PURCHASE | DEPOSIT | ...
+  medium: string // balance | checking | ...
+  transactionDate: string // YYYY-MM-DD
+  status: string // COMPLETED | PENDING | ...
+  amount: number // negativo = gasto, positivo = ingreso
+  customerId: string
+  accountNumber: string
+  description: string
+  merchant?: string // ausente en DEPOSIT
+  createdAt: string // ISO 8601
+  updatedAt: string // ISO 8601
+}
+
+export interface OperationResponse {
+  message: string
+  status: number
+  resource: OperationDTO[]
+}
+
+// ── POST /operation (registrar operación en el ledger) ──
+export interface CreateOperationBody {
+  type: 'PURCHASE' | 'DEPOSIT' | 'WITHDRAWAL' | string
+  medium: string
+  status: 'completed' | 'pending' | string
+  amount: number // negativo = sale de la cuenta, positivo = entra
+  description: string
+  merchant: string
+}
+
+export interface CreateOperationResponse {
+  message: string
+  status: number
+  resource: OperationDTO
 }
 
 // ── Pantalla: Analytics / Flujo (pages/analytics.vue) ──

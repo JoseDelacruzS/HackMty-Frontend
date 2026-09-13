@@ -2,6 +2,10 @@ import type {
   DashboardResponse,
   HistoryResponse,
   HistoryQuery,
+  OperationResponse,
+  CreateOperationBody,
+  CreateOperationResponse,
+  UserResponse,
   AnalyticsResponse,
   SavingsResponse,
   SavingsOperationResponse,
@@ -78,6 +82,26 @@ export function useFinancialApi() {
     return await $fetch<HistoryResponse>(`/api/transactions/${id}`, { headers: headers() });
   }
 
+  // ── Operations (backend real) ──
+  // GET /api/operation?limit&offset&category&isLeak&status → OperationResponse
+  // Backend devuelve { message, status, resource: [...] }
+  async function getOperations(query: HistoryQuery = {}) {
+    return await $fetch<OperationResponse>("/api/operation", {
+      headers: headers(),
+      query,
+    });
+  }
+
+  // ── Operations (backend real) ──
+  // POST /api/operation { type, medium, status, amount, description, merchant }
+  async function createOperation(body: CreateOperationBody) {
+    return await $fetch<CreateOperationResponse>("/api/operation", {
+      method: "POST",
+      headers: headers(),
+      body,
+    });
+  }
+
   // ── Analytics ──
   // GET /api/analytics → AnalyticsResponse
   async function getAnalytics() {
@@ -147,14 +171,17 @@ export function useFinancialApi() {
   }
 
   // ── Helpers para páginas ──
+  // GET /api/user → UserResponse { message, status, resource: [...] }
   async function getUser() {
-    return await $fetch<{ user: DashboardResponse["user"] }>("/api/user", { headers: headers() });
+    return await $fetch<UserResponse>("/api/user", { headers: headers() });
   }
 
   return {
     getDashboard,
     getTransactions,
     getTransactionById,
+    getOperations,
+    createOperation,
     getAnalytics,
     getCajita,
     depositToCajita,

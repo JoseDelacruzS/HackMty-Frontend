@@ -19,6 +19,7 @@
 <script setup lang="ts">
 const { locale, code } = useAppLocale()
 const auth = useAuthStore()
+const userStore = useUserStore()
 
 useHead({
   htmlAttrs: { lang: code }
@@ -30,6 +31,12 @@ if (import.meta.client) {
 } else {
   const cookie = useCookie<string | null>('auth_token')
   if (cookie.value) auth.token = cookie.value
+}
+
+// perfil persistido: rehidrata al instante y refresca desde GET /user si hay sesión
+userStore.init()
+if (import.meta.client && auth.isAuthenticated) {
+  userStore.fetchUser()
 }
 
 const showSplash = ref(true)
