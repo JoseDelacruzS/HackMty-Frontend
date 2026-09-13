@@ -4,8 +4,19 @@ import { useFinancialStore } from "~/stores/financialStore";
 const store = useFinancialStore();
 const { t } = useLocale();
 
-const savingsRate = computed(() => (store.metrics.safeToSave / store.metrics.income) * 100);
-const solvencyPct = computed(() => Math.min(100, Math.round((savingsRate.value / 20) * 100)));
+const savingsRate = computed(() => {
+  const income = Number(store.metrics.income) || 0;
+  const safe = Number(store.metrics.safeToSave) || 0;
+  if (income <= 0) return 0;
+  const raw = (safe / income) * 100;
+  // Tasa negativa → 0% por defecto (evita -Infinity%)
+  if (!Number.isFinite(raw) || raw < 0) return 0;
+  return raw;
+});
+const solvencyPct = computed(() => {
+  if (!Number.isFinite(savingsRate.value) || savingsRate.value <= 0) return 0;
+  return Math.min(100, Math.max(0, Math.round((savingsRate.value / 20) * 100)));
+});
 </script>
 <template>
   <div class="grid grid-cols-2 gap-3">
