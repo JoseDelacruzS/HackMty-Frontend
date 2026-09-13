@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useLocale } from '@nuxt/ui/composables'
+import { useFinancialStore } from "~/stores/financialStore"
 
 definePageMeta({ layout: "auth" });
 
 const { t } = useLocale()
 const { code, setLocale } = useAppLocale()
+const store = useFinancialStore()
 
 const localeOptions = [
   { value: 'es' as const, label: 'ES' },
@@ -30,7 +32,15 @@ async function onSubmit() {
 
   try {
     isLoading.value = true
-    // Simular llamada o integrar tu provider de autenticación
+    const res = await $fetch<{ success: boolean; user: any }>('/api/auth/login', {
+      method: 'POST',
+      body: { email: state.email, password: state.password }
+    })
+
+    if (res.success && res.user) {
+      store.setUser(res.user)
+    }
+
     await navigateTo('/')
   } catch (e) {
     error.value = t('auth.genericError')
