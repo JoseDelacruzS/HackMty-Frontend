@@ -5,6 +5,13 @@ const store = useFinancialStore()
 const { t } = useLocale()
 
 const SAVINGS_GOAL_RATE = 0.2
+const isLoading = ref(false)
+onMounted(async () => {
+  isLoading.value = true
+  await store.fetchAnalytics()
+  // también trae aforeProjection actualizado para el grafo
+  isLoading.value = false
+})
 
 const income = computed(() => store.metrics.income)
 const variableExpenses = computed(() =>

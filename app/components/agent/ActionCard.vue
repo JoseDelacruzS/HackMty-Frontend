@@ -3,6 +3,12 @@ import { useLocale } from '@nuxt/ui/composables'
 import { useFinancialStore } from "~/stores/financialStore";
 const store = useFinancialStore();
 const { t } = useLocale();
+const isSubmitting = ref(false)
+async function onContribute() {
+  isSubmitting.value = true
+  await store.contributeAforeRemote(store.metrics.recommendedAfore)
+  isSubmitting.value = false
+}
 </script>
 <template>
   <UCard>
@@ -26,9 +32,9 @@ const { t } = useLocale();
       :title="t('action.impact', { amount: (store.aforeProjection.withAgent - store.aforeProjection.withoutAgent).toLocaleString() })"
       class="mt-3" />
 
-    <UButton :disabled="store.executed" :color="store.executed ? 'success' : 'primary'"
+    <UButton :disabled="store.executed" :loading="isSubmitting" :color="store.executed ? 'success' : 'primary'"
       :icon="store.executed ? 'i-heroicons-check-circle' : 'i-heroicons-arrow-path'" block size="lg"
-      class="mt-4 min-h-[52px] font-semibold" @click="store.applyAforeContribution(store.metrics.recommendedAfore)">
+      class="mt-4 min-h-[52px] font-semibold" @click="onContribute">
       {{ store.executed ? t('action.ctaDone') : t('action.cta', { amount: `$${store.metrics.recommendedAfore} MXN` }) }}
     </UButton>
   </UCard>

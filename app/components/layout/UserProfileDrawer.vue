@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useLocale } from '@nuxt/ui/composables'
+import { useAuthStore } from '~/stores/auth'
+import { useFinancialStore } from '~/stores/financialStore'
 const { t } = useLocale()
+const auth = useAuthStore()
+const financial = useFinancialStore()
 
 const props = withDefaults(defineProps<{
   profile: UserProfile
@@ -43,6 +47,8 @@ const fullStreet = computed(
 
 async function logout() {
   open.value = false
+  auth.logout()
+  financial.logout()
   await navigateTo('/login')
 }
 </script>
