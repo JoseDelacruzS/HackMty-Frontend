@@ -2,7 +2,6 @@
 import { useLocale } from '@nuxt/ui/composables'
 
 const { t } = useLocale()
-const initial = computed(() => t('app.shortTitle').charAt(0))
 </script>
 
 <template>
@@ -15,10 +14,11 @@ const initial = computed(() => t('app.shortTitle').charAt(0))
     <div class="w-full max-w-md space-y-6 relative z-10">
       <!-- Branding / Header -->
       <div class="flex flex-col items-center justify-center space-y-3 text-center">
-        <div
-          class="size-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl shadow-lg shadow-primary/20 ring-4 ring-primary/10 transition-transform hover:scale-105">
-          {{ initial }}
-        </div>
+        <img
+          src="/Isotipo-Dark.jpeg"
+          alt="AlcancIA"
+          class="size-12 rounded-2xl object-cover shadow-lg ring-4 ring-primary/10 transition-transform hover:scale-105"
+        />
         <div class="space-y-1">
           <h1 class="text-2xl font-bold tracking-tight text-(--ui-text-highlighted)">
             {{ t('app.shortTitle') }}

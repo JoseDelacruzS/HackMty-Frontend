@@ -18,7 +18,7 @@ const profile = {
 </script>
 <template>
   <header
-    class="flex items-center justify-between gap-3 px-4 pt-[env(safe-area-inset-top)] border-b border-default bg-default/80 backdrop-blur-md">
+    class="flex items-center justify-between gap-3 px-4 border-b border-default bg-default/80 backdrop-blur-md">
     <div class="py-3 flex items-center gap-2.5 min-w-0">
       <LayoutUserProfileDrawer :profile="profile" />
       <div class="min-w-0">

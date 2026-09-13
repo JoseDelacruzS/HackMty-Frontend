@@ -89,8 +89,8 @@ export default defineAppConfig({
       messages: {
         ...es.messages,
         app: {
-          title: "AutoAfore Agent",
-          shortTitle: "AutoAfore",
+          title: "AlcancIA",
+          shortTitle: "AlcancIA",
           live: "En vivo",
           stream: "Capital One Nessie Stream",
           greeting: "Hola de nuevo",
@@ -282,8 +282,8 @@ export default defineAppConfig({
       messages: {
         ...en.messages,
         app: {
-          title: "AutoAfore Agent",
-          shortTitle: "AutoAfore",
+          title: "AlcancIA",
+          shortTitle: "AlcancIA",
           live: "Live",
           stream: "Capital One Nessie Stream",
           greeting: "Welcome back",
@@ -390,7 +390,7 @@ export default defineAppConfig({
         },
         settings: {
           title: "Settings",
-          subtitle: "Make AutoAfore yours",
+          subtitle: "Make AlcancIA yours",
           appearance: "Appearance",
           appearanceDescription: "Light or dark mode",
           language: "Language",
