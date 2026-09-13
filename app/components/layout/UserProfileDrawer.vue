@@ -2,53 +2,27 @@
 import { useLocale } from '@nuxt/ui/composables'
 import { useAuthStore } from '~/stores/auth'
 import { useFinancialStore } from '~/stores/financialStore'
+import { useUserStore } from '~/stores/userStore'
 const { t } = useLocale()
 const auth = useAuthStore()
 const financial = useFinancialStore()
+const user = useUserStore()
 
-const props = withDefaults(defineProps<{
-  profile: UserProfile
-}>(), {
-  profile: () => ({
-    last_name: 'Arecjoha',
-    first_name: 'Test Eugenio',
-    _id: 'e96df8a9-433b-4f53-91db-fb19def43c07',
-    address: {
-      street_number: '528',
-      street_name: 'Av arturo B',
-      city: 'San Nicolas',
-      state: 'Nuevo Leon',
-      zip: '66414'
-    },
-    avatar: 'https://api.dicebear.com/9.x/notionists/svg?seed=Arecjoha'
-  })
-})
-
-export interface UserProfile {
-  last_name: string
-  first_name: string
-  _id: string
-  address: {
-    street_number: string
-    street_name: string
-    city: string
-    state: string
-    zip: string
-  }
-  avatar?: string
-}
+const profile = computed(() => user.profile)
 
 const open = ref(false)
 
-const shortId = computed(() => `${props.profile._id.slice(0, 8)}…`)
-const fullStreet = computed(
-  () => `${props.profile.address.street_name} ${props.profile.address.street_number}`
-)
+const shortId = computed(() => profile.value._id ? `${profile.value._id.slice(0, 8)}…` : '—')
+const fullStreet = computed(() => {
+  const a = profile.value.address
+  return a ? `${a.street_name} ${a.street_number}` : ''
+})
 
 async function logout() {
   open.value = false
   auth.logout()
   financial.logout()
+  user.clear()
   await navigateTo('/login')
 }
 </script>
@@ -98,8 +72,8 @@ async function logout() {
           </UCard>
         </section>
 
-        <!-- Dirección -->
-        <section>
+        <!-- Dirección (solo si el backend la envía) -->
+        <section v-if="profile.address">
           <h3 class="text-xs font-semibold uppercase tracking-wider text-muted mb-2">
             {{ t('profile.address') }}
           </h3>
@@ -125,9 +99,6 @@ async function logout() {
 
     <template #footer>
       <div class="p-4 flex flex-col gap-2">
-        <UButton color="primary" block size="lg" icon="i-heroicons-pencil-square" class="min-h-12 font-semibold">
-          {{ t('profile.edit') }}
-        </UButton>
         <UButton color="error" variant="soft" block size="lg" icon="i-heroicons-arrow-right-on-rectangle" class="min-h-12 font-semibold" @click="logout">
           {{ t('profile.logout') }}
         </UButton>

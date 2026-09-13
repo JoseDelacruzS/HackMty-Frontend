@@ -4,8 +4,9 @@ import { useAgentEngine } from "~/composables/useAgentEngine"
 import { useFinancialStore } from "~/stores/financialStore"
 
 const store = useFinancialStore()
+const userStore = useUserStore()
 const { t } = useLocale()
-const firstName = computed(() => store.user.name?.split(' ')[0] ?? 'Sofía')
+const firstName = computed(() => userStore.firstName || store.user.name?.split(' ')[0] || 'Sofía')
 
 const { start } = useAgentEngine()
 const isLoadingDashboard = ref(false)

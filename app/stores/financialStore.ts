@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { DashboardResponse, HistoryResponse, AnalyticsResponse, SavingsResponse } from "~/types/api";
+import type { DashboardResponse, HistoryResponse, AnalyticsResponse, SavingsResponse, OperationDTO, OperationResponse, CreateOperationBody } from "~/types/api";
 
 export interface Transaction {
   id: string;
@@ -94,6 +94,9 @@ export const useFinancialStore = defineStore("financial", {
   }),
   actions: {
     // ── local optimistic (fallback) ──
+    formatMXN(n: number) {
+      return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 2 }).format(n);
+    },
     depositToCajita(amount: number) {
       if (this.cajita && amount > 0) {
         this.cajita.balance += amount;
@@ -148,6 +151,32 @@ export const useFinancialStore = defineStore("financial", {
     hydrateHistory(data: HistoryResponse) {
       if (data.transactions) this.transactions = data.transactions as Transaction[];
     },
+    inferOperationCategory(op: OperationDTO) {
+      const haystack = `${op.merchant ?? ""} ${op.description ?? ""}`.toUpperCase();
+      if (op.type?.toUpperCase() === "DEPOSIT" || op.amount > 0 || /N[OÓ]MINA|EMPRESA|DEP[OÓ]SITO|SALARIO/.test(haystack)) return "income";
+      if (/DIDI|RAPPI|UBER\s?EATS/.test(haystack)) return "food_delivery";
+      if (/NETFLIX|SPOTIFY|PRIME|DISNEY|HBO|YOUTUBE/.test(haystack)) return "subscriptions";
+      if (/OXXO|7-ELEVEN|SEVEN/.test(haystack)) return "convenience";
+      if (/STARBUCKS|CAF[EÉ]/.test(haystack)) return "coffee";
+      return "purchase";
+    },
+    hydrateOperations(data: OperationResponse) {
+      if (!data?.resource) return;
+      this.transactions = data.resource
+        .map((op) => ({
+          id: op._id,
+          merchant: op.merchant ?? op.description ?? op.type ?? "—",
+          amount: op.amount,
+          category: this.inferOperationCategory(op),
+          timestamp: op.transactionDate ? new Date(op.transactionDate).toISOString() : op.createdAt,
+          isLeak: false,
+          medium: op.medium?.toLowerCase() ?? "balance",
+          status: op.status?.toLowerCase() ?? "completed",
+          description: op.description ?? op.merchant,
+        }))
+        // el backend las devuelve de más vieja a más nueva: invertir para mostrar recientes primero
+        .sort((a, b) => +new Date(b.timestamp) - +new Date(a.timestamp));
+    },
     hydrateAnalytics(data: AnalyticsResponse) {
       if (data.summary) {
         this.metrics.income = data.summary.income ?? this.metrics.income;
@@ -175,6 +204,14 @@ export const useFinancialStore = defineStore("financial", {
         return data;
       } catch (e) { console.warn("[fetchTransactions] backend no disponible", e); return null; }
     },
+    async fetchOperations(query: any = {}) {
+      try {
+        const { getOperations } = useFinancialApi();
+        const data = await getOperations(query);
+        this.hydrateOperations(data);
+        return data;
+      } catch (e) { console.warn("[fetchOperations] backend no disponible", e); return null; }
+    },
     async fetchAnalytics() {
       try {
         const { getAnalytics } = useFinancialApi();
@@ -192,20 +229,62 @@ export const useFinancialStore = defineStore("financial", {
       } catch (e) { console.warn("[fetchCajita] backend no disponible", e); return null; }
     },
     async depositToCajitaRemote(amount: number) {
-      try {
-        const { depositToCajita } = useFinancialApi();
-        const res = await depositToCajita(amount);
-        if (res.cajita) this.cajita = res.cajita as any;
-        return res;
-      } catch { this.depositToCajita(amount); return null; }
+      // Solo POST /operation: el dinero sale de la cuenta principal → PURCHASE negativo
+      const op = await this.createOperationRemote({
+        type: "PURCHASE",
+        medium: "balance",
+        status: "completed",
+        amount: -Math.abs(amount),
+        description: `Depósito a ${this.cajita?.title ?? "Cajita Afore"}`,
+        merchant: this.cajita?.title ?? "Cajita Afore",
+      });
+      if (op) {
+        this.depositToCajita(amount);
+        useToast().add({
+          title: "Depósito registrado",
+          description: `${this.formatMXN(amount)} a ${this.cajita?.title ?? "tu cajita"}`,
+          color: "success",
+          icon: "i-heroicons-check-circle",
+        });
+      }
+      return op;
     },
     async withdrawFromCajitaRemote(amount: number) {
+      // Solo POST /operation: el retiro entra a la cuenta principal → WITHDRAWAL positivo
+      const op = await this.createOperationRemote({
+        type: "WITHDRAWAL",
+        medium: "balance",
+        status: "completed",
+        amount: Math.abs(amount),
+        description: `Retiro de ${this.cajita?.title ?? "Cajita Afore"}`,
+        merchant: this.cajita?.title ?? "Cajita Afore",
+      });
+      if (op) {
+        this.withdrawFromCajita(amount);
+        useToast().add({
+          title: "Retiro registrado",
+          description: `${this.formatMXN(amount)} de vuelta a tu cuenta`,
+          color: "success",
+          icon: "i-heroicons-check-circle",
+        });
+      }
+      return op;
+    },
+    async createOperationRemote(body: CreateOperationBody) {
       try {
-        const { withdrawFromCajita } = useFinancialApi();
-        const res = await withdrawFromCajita(amount);
-        if (res.cajita) this.cajita = res.cajita as any;
-        return res;
-      } catch { this.withdrawFromCajita(amount); return null; }
+        const { createOperation } = useFinancialApi();
+        return await createOperation(body);
+      } catch (e: any) {
+        console.warn("[createOperation] no se pudo registrar en el historial", e);
+        const toast = useToast();
+        toast.add({
+          title: "No se pudo registrar la operación en el historial",
+          description: e?.data?.statusMessage || e?.message || "Inténtalo de nuevo",
+          color: "warning",
+          icon: "i-heroicons-exclamation-triangle",
+        });
+        return null;
+      }
     },
     async contributeAforeRemote(amount: number) {
       try {
